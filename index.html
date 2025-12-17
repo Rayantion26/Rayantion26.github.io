@@ -19,10 +19,17 @@
             --neon-lime: #39ff14;
         }
 
+        /* UNIVERSAL RESET & UNSELECTABLE TEXT */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            
+            /* The magic lines to stop text selection */
+            -webkit-user-select: none; /* Chrome, Safari, Opera */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
         }
 
         body {
@@ -33,7 +40,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Hide scrollbars for the canvas */
+            overflow: hidden; /* Hide scrollbars */
             position: relative;
         }
 
@@ -44,15 +51,21 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Place behind content */
+            z-index: -1; 
         }
 
         .main-container {
             text-align: center;
             z-index: 1;
             padding: 20px;
-            /* Add a subtle dark fade behind text so it's readable over lines */
-            background: radial-gradient(circle, rgba(5,5,16,0.8) 0%, rgba(5,5,16,0) 70%); 
+            /* Subtle radial gradient to make text readable */
+            background: radial-gradient(circle, rgba(5,5,16,0.85) 0%, rgba(5,5,16,0) 70%); 
+            pointer-events: none; /* Clicks pass through the container to the canvas */
+        }
+
+        /* Re-enable pointer events for buttons/text so you can still click links */
+        .main-container > * {
+            pointer-events: auto;
         }
 
         header h1 {
@@ -62,17 +75,16 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
-            pointer-events: none; /* Let mouse pass through to canvas */
+            cursor: default; /* Arrow cursor even on text */
         }
 
         header p {
             color: var(--text-secondary);
             font-size: 1.1rem;
             margin-bottom: 50px;
-            pointer-events: none;
+            cursor: default;
         }
 
-        /* Grid for the project cards */
         .card-grid {
             display: flex;
             gap: 30px;
@@ -80,7 +92,6 @@
             flex-wrap: wrap;
         }
 
-        /* Card Styles */
         .project-card {
             background: var(--card-bg);
             width: 280px;
@@ -183,7 +194,7 @@
     </main>
 
     <script>
-        // --- 1. 3D Tilt Effect ---
+        // --- 1. 3D Tilt Logic ---
         const cards = document.querySelectorAll('.project-card');
         cards.forEach(card => {
             card.addEventListener('mousemove', (e) => {
@@ -200,19 +211,19 @@
             });
         });
 
-        // --- 2. Interactive "Network" Background Script ---
+        // --- 2. Background System ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        let particlesArray;
+        let particlesArray = [];
+        let explosionsArray = []; // Store the click bursts here
 
-        // Mouse Position Tracker
         let mouse = {
             x: null,
             y: null,
-            radius: 150 // Radius around mouse where lines will connect
+            radius: 150
         }
 
         window.addEventListener('mousemove', function(event){
@@ -220,10 +231,12 @@
             mouse.y = event.y;
         });
 
-        // If mouse leaves window, reset position so lines don't get stuck
-        window.addEventListener('mouseout', function(){
-            mouse.x = undefined;
-            mouse.y = undefined;
+        // *** CLICK EVENT LISTENER ***
+        window.addEventListener('click', function(event){
+            // Create 20 burst particles at mouse location
+            for(let i=0; i<20; i++){
+                explosionsArray.push(new Explosion(event.x, event.y));
+            }
         });
 
         window.addEventListener('resize', () => {
@@ -232,33 +245,29 @@
             initParticles();
         });
 
-        // Particle Class
+        // Standard Background Particle
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 1 - 0.5; // Moderate speed
+                this.speedX = Math.random() * 1 - 0.5;
                 this.speedY = Math.random() * 1 - 0.5;
-                this.color = '#00f7ff'; // Cyan base
+                this.color = '#00f7ff';
             }
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
-
-                // Bounce off edges
                 if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
                 if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
 
-                // Mouse Interaction: If mouse is close, connect!
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
                 
-                // Draw line to mouse
                 if (distance < mouse.radius) {
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(0, 247, 255, ${1 - distance/mouse.radius})`; // Fade out line
+                    ctx.strokeStyle = `rgba(0, 247, 255, ${1 - distance/mouse.radius})`; 
                     ctx.lineWidth = 1;
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(mouse.x, mouse.y);
@@ -273,9 +282,36 @@
             }
         }
 
+        // *** EXPLOSION PARTICLE CLASS ***
+        class Explosion {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                // Random explosion direction and speed
+                this.speedX = Math.random() * 6 - 3; 
+                this.speedY = Math.random() * 6 - 3;
+                this.size = Math.random() * 5 + 2; // Start big
+                
+                // Randomly pick a neon color
+                const colors = ['#00f7ff', '#ff00c8', '#39ff14', '#ffffff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                // Shrink over time
+                if (this.size > 0.1) this.size -= 0.1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
         function initParticles() {
             particlesArray = [];
-            // Calculate number of particles based on screen size (prevent lag on big screens)
             const numberOfParticles = (canvas.height * canvas.width) / 10000; 
             for (let i = 0; i < numberOfParticles; i++) {
                 particlesArray.push(new Particle());
@@ -284,27 +320,39 @@
 
         function animateParticles() {
             requestAnimationFrame(animateParticles);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Use slight trail effect
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
 
+            // Handle Background Particles
             for (let i = 0; i < particlesArray.length; i++) {
                 particlesArray[i].update();
                 particlesArray[i].draw();
 
-                // Connect particles to EACH OTHER if close
+                // Connect particles logic
                 for (let j = i; j < particlesArray.length; j++) {
                     let dx = particlesArray[i].x - particlesArray[j].x;
                     let dy = particlesArray[i].y - particlesArray[j].y;
                     let distance = Math.sqrt(dx*dx + dy*dy);
-
                     if (distance < 100) {
                         ctx.beginPath();
-                        // Make connection lines faint purple/blue
                         ctx.strokeStyle = `rgba(100, 100, 255, ${1 - distance/100})`; 
                         ctx.lineWidth = 0.5;
                         ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
                         ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
                         ctx.stroke();
                     }
+                }
+            }
+
+            // Handle Explosion Particles
+            for (let i = 0; i < explosionsArray.length; i++) {
+                explosionsArray[i].update();
+                explosionsArray[i].draw();
+                
+                // Remove particles that are too small
+                if (explosionsArray[i].size <= 0.2) {
+                    explosionsArray.splice(i, 1);
+                    i--;
                 }
             }
         }
