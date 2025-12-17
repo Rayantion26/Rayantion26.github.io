@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayantion.me - Project Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #050510;
+            --card-bg: #13132a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0c0;
+            /* Neon accents for different cards */
+            --neon-cyan: #00f7ff;
+            --neon-pink: #ff00c8;
+            --neon-lime: #39ff14;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* hide scrollbars for the canvas */
+            position: relative;
+        }
+
+        /* Background Particle Canvas */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* place behind content */
+            opacity: 0.6;
+        }
+
+        .main-container {
+            text-align: center;
+            z-index: 1;
+            padding: 20px;
+        }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /* Subtle text glow */
+            text-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+        }
+
+        /* Grid for the project cards */
+        .card-grid {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Card Styles */
+        .project-card {
+            background: var(--card-bg);
+            width: 280px;
+            height: 320px;
+            text-decoration: none;
+            color: var(--text-primary);
+            border-radius: 15px;
+            position: relative;
+            /* Necessary for 3D tilt effect */
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* The internal content of the card needs to pop out in 3D */
+        .card-content {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.03); /* Slight glass effect */
+            backdrop-filter: blur(5px);
+            /* Push content forward in Z-space */
+            transform: translateZ(40px);
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .project-card h2 {
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .project-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* --- Hover Effects & Unique Colors --- */
+
+        /* About Me - Cyan Theme */
+        .card-about:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 40px rgba(0, 247, 255, 0.3);
+        }
+        .card-about .card-icon { color: var(--neon-cyan); }
+
+        /* BST Visualizer - Lime Theme */
+        .card-bst:hover {
+            border-color: var(--neon-lime);
+            box-shadow: 0 0 40px rgba(57, 255, 20, 0.3);
+        }
+        .card-bst .card-icon { color: var(--neon-lime); }
+
+        /* Aaron - Pink Theme */
+        .card-aaron:hover {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 40px rgba(255, 0, 200, 0.3);
+        }
+        .card-aaron .card-icon { color: var(--neon-pink); }
+
+        /* Slight icon jump on hover */
+        .project-card:hover .card-icon {
+            transform: scale(1.1) translateZ(50px);
+            text-shadow: 0 0 20px currentColor;
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <main class="main-container">
+        <header>
+            <h1>Rayantion's Nexus</h1>
+            <p>Select a project portal to initiate transfer.</p>
+        </header>
+
+        <div class="card-grid">
+            <a href="/AboutMe/" class="project-card card-about" data-tilt>
+                <div class="card-content">
+                    <i class="card-icon fa-solid fa-user-astronaut"></i>
+                    <h2>About Me</h2>
+                    <p>Who I am, my skills, and my journey into development.</p>
+                </div>
+            </a>
+
+            <a href="/BSTVisualizer/" class="project-card card-bst" data-tilt>
+                <div class="card-content">
+                    <i class="card-icon fa-solid fa-network-wired"></i>
+                    <h2>BST Visualizer</h2>
+                    <p>Interactive tool to explore Binary Search Tree data structures.</p>
+                </div>
+            </a>
+
+            <a href="/Aaron/" class="project-card card-aaron" data-tilt>
+                <div class="card-content">
+                    <i class="card-icon fa-solid fa-ghost"></i>
+                    <h2>Aaron's Page</h2>
+                    <p>A unique project corner. Enter if you dare.</p>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. 3D Tilt Effect Script ---
+        const cards = document.querySelectorAll('.project-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                // Calculate mouse position relative to the card center
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+
+                // Rotation multipliers (adjust for more/less extreme tilt)
+                const multiplier = 15;
+
+                // Calculate rotation values based on mouse position
+                // Y-axis rotation is based on X mouse position, and vice versa.
+                // We invert X rotation so tilting up feels natural.
+                const rotateX = (y / (rect.height / 2)) * -multiplier;
+                const rotateY = (x / (rect.width / 2)) * multiplier;
+
+                // Apply the transform. We also lift it up slightly (translateY -10px)
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) scale(1.02)`;
+            });
+
+            // Reset card position when mouse leaves
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)`;
+            });
+        });
+
+
+        // --- 2. Background Particles Script ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+
+        // Set canvas size to full screen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        // Particle creator
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5; // Random size between 0.5 and 2.5
+                this.speedX = Math.random() * 0.5 - 0.25; // Random slow horizontal speed
+                this.speedY = Math.random() * 0.5 - 0.25; // Random slow vertical speed
+                // Random colors from our neon palette
+                const colors = ['#00f7ff', '#ff00c8', '#39ff14', '#ffffff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                // Wrap around screen edges
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            const numberOfParticles = (canvas.height * canvas.width) / 15000; // Density calculation
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+    </script>
+</body>
+</html>
