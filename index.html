@@ -57,10 +57,10 @@
         }
 
         /* --- FADE IN ANIMATION DEFINITION --- */
-        @keyframes pageLoad {
+        @keyframes fadeInUp {
             0% {
                 opacity: 0;
-                transform: translateY(20px); /* Start slightly lower */
+                transform: translateY(30px); /* Start 30px lower */
             }
             100% {
                 opacity: 1;
@@ -75,8 +75,8 @@
             background: radial-gradient(circle, rgba(5,5,16,0.85) 0%, rgba(5,5,16,0) 70%); 
             pointer-events: none;
             
-            /* APPLY ANIMATION HERE */
-            animation: pageLoad 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            /* APPLY ANIMATION (1 second duration, smooth easing) */
+            animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
         .main-container > * {
@@ -265,7 +265,6 @@
             mouse.y = event.y;
         });
 
-        // Click Explosion
         window.addEventListener('click', function(event){
             for(let i=0; i<20; i++){
                 explosionsArray.push(new Explosion(event.x, event.y));
